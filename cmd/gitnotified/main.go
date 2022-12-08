@@ -8,6 +8,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+
+	"github.com/t0nyandre/git-notified/internal/pkg/database/postgres"
 )
 
 func init() {
@@ -17,9 +19,16 @@ func init() {
 }
 
 func main() {
-	router := chi.NewRouter()
+	r := chi.NewRouter()
 
-	fmt.Println(os.Getenv("THISISIT"))
+	// Connect to database
+	_, err := postgres.NewPostgres()
+	if err != nil {
+		log.Fatalf("Could not connect to database: %v", err)
+	}
 
-	http.ListenAndServe(":4000", router)
+	log.Println(fmt.Sprintf("Server running on %s:%s", os.Getenv("APP_HOST"), os.Getenv("APP_PORT")))
+	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", os.Getenv("APP_HOST"), os.Getenv("APP_PORT")), r); err != nil {
+		log.Fatalf("Could not start server: %v", err)
+	}
 }
