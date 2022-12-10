@@ -1,18 +1,41 @@
 package logger
 
 import (
-	"log"
+	"encoding/json"
+	"fmt"
+	"time"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func NewLogger() *zap.SugaredLogger {
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		log.Fatalf("Could not create logger: %v", err)
-	}
-	defer logger.Sync()
-	sugar := logger.Sugar()
+	dateString := time.Now().Format("20060102")
+	rawJSON := []byte(`{
+		"level": "debug",
+		"encoding": "json",
+		"errorOutputPaths": ["stderr"],
+		"encoderConfig": {
+			"messageKey": "msg",
+			"levelKey": "level",
+			"levelEncoder": "lowercase"
+		}
+	}`)
 
-	return sugar
+	var cfg zap.Config
+	if err := json.Unmarshal(rawJSON, &cfg); err != nil {
+		panic(err)
+	}
+
+	cfg.OutputPaths = []string{"stdout", fmt.Sprintf("./logs/%s.json", dateString)}
+	cfg.EncoderConfig.TimeKey = "timestamp"
+	cfg.EncoderConfig.EncodeTime = zapcore.RFC3339NanoTimeEncoder
+
+	l, err := cfg.Build()
+	if err != nil {
+		panic(err)
+	}
+	logger := l.Sugar()
+
+	return logger
 }

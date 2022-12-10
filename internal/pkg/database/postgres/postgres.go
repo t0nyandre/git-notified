@@ -2,14 +2,14 @@ package postgres
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"go.uber.org/zap"
 )
 
-func NewPostgres() (*sqlx.DB, error) {
+func NewPostgres(logger *zap.SugaredLogger) (*sqlx.DB, error) {
 	db, err := sqlx.Open("postgres",
 		fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s",
 			os.Getenv("POSTGRES_USER"),
@@ -20,7 +20,8 @@ func NewPostgres() (*sqlx.DB, error) {
 		return nil, err
 	}
 
-	log.Println("Successfully connected to database")
+	logger.Infow("Successfully connected to database",
+		"database", os.Getenv("POSTGRES_DB"))
 
 	return db, nil
 }

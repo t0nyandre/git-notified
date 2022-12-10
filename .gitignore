@@ -25,5 +25,8 @@ go.work
 
 # Auto-generated tag files
 tags
+logs/*
+!logs/.gitkeep
+
 # Persistent undo
 [._]*.un~
