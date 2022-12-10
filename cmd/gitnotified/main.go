@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 
+	"github.com/t0nyandre/git-notified/internal/auth/github"
 	"github.com/t0nyandre/git-notified/internal/pkg/database/postgres"
 )
 
@@ -21,11 +22,14 @@ func init() {
 func main() {
 	r := chi.NewRouter()
 
+	oAuthGithub := github.NewGithub()
 	// Connect to database
 	_, err := postgres.NewPostgres()
 	if err != nil {
 		log.Fatalf("Could not connect to database: %v", err)
 	}
+	r.Get("/auth/github/login", oAuthGithub.GithubLogin)
+	r.Get("/auth/github/callback", oAuthGithub.GithubCallback)
 
 	log.Println(fmt.Sprintf("Server running on %s:%s", os.Getenv("APP_HOST"), os.Getenv("APP_PORT")))
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", os.Getenv("APP_HOST"), os.Getenv("APP_PORT")), r); err != nil {
