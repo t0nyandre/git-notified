@@ -11,6 +11,7 @@ import (
 
 	"github.com/t0nyandre/git-notified/internal/auth/github"
 	"github.com/t0nyandre/git-notified/internal/pkg/database/postgres"
+	"github.com/t0nyandre/git-notified/pkg/logger"
 )
 
 func init() {
@@ -21,6 +22,7 @@ func init() {
 
 func main() {
 	r := chi.NewRouter()
+	_ = logger.NewLogger()
 
 	oAuthGithub := github.NewGithub()
 	// Connect to database
